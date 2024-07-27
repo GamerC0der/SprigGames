@@ -36,23 +36,6 @@ LL000000000000LL
 LL000000000000LL
 11LLLLLLLLLLLL11
 11LLLLLLLLLLLL11`],
-  [ enemy,  bitmap`
-3399999999999933
-3399999999999933
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-9900000000000099
-3399999999999933
-3399999999999933`],
   [ wall,  bitmap`
 0000000000000000
 0000000000000000
@@ -71,22 +54,39 @@ LL000000000000LL
 0000000000000000
 0000000000000000`],
   [ decoywall,  bitmap`
-0000000000000000
-0000000000000000
+L000000000000000
+0L00000000000000
 00L0000000000000
-00000000000L0000
-0000000000000000
-0000000000000000
-0000000000000000
-0000000000000000
-000L0000L0000000
-0000000000000000
-0000000000000000
-00000000000L0000
-0000000000000000
+000L000000000000
+0000L00000000000
+00000L0000000000
+000000L000000000
 0000000L00000000
-0000000000000000
-0000000000000000`],
+00000000L0000000
+000000000L000000
+0000000000L00000
+00000000000L0000
+000000000000L000
+0000000000000L00
+00000000000000L0
+000000000000000L`],
+  [ enemy, bitmap`
+....33333333....
+...3333333333...
+..333333333333..
+.33399999999333.
+3339999999999333
+3399999999999933
+3399999999999933
+3399999999999933
+3399999999999933
+3399999999999933
+3399999999999933
+3399999999999933
+.33999999999933.
+..339999999933..
+...3333333333...
+....33333333....`],
 
   [ goal,  bitmap`
 6666666666666666
@@ -143,31 +143,46 @@ FFFFFFFFFFFFFFFF`],
   
 )
 
-setSolids([ player, wall, enemy, decoywall ])
+setSolids([ player, wall, decoywall ])
 
 let level = 0
 const levels = [
   map`
-    p.....g
-    ...|||.
-    ....e..
-  `,
-  map`
-    pe....|t|....|
-    ...|..|.|.|..g
-    ..........||||
-    ||||||||||||||
-    ||||||||||||||
-  `,
-  map`
-..d|pdd||||||..|dd
-..d..d......|..|||
-t.|..dx...e.|..|g|
-..|..d......d..|g.
-..|||||||||||.....`,
-  map`
-dtddxaaaddaaedd
-pddddddaaaadddd`
+||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||
+|||............|||||||||||||||
+|||.....||||||.|||||||||||||||
+|||.....|......|||||||||||||||
+|||..|xx|x||||.|||||||||||||||
+|||..|.........|||||||||||||||
+|||.x|.....|||||||||||||||||||
+|||..|...|||.........x.......|
+|||..|...|.a.x...............|
+|||x.|...|.a.x.|||||||||||...|
+|g|..|...|.|...|.x.g.x...|...|
+|.|..|...|.|||||..a......|...|
+|.|..||x.|.....|......x..|.xx|
+|.|.x||..|...|.|x........|...|
+|.|..||..|||||.|............x|
+|.|..||........|......||||||||
+|.|..|||..x....|.....a|......|
+|p|..|||.....|.|xx..xx|..|||.|
+|.x...||..||.|.|.aaaaa|...x..|
+|......|..||x|x|...a......x..|
+|...||.|.....|.|..xxxxxx....x|
+|...||.|x......|...........xx|
+|...||.|xx.....|||||||||||||||
+|......|||||...|||||||||||||||
+|....xx|||||...|||||||||||||||
+|...xx||x..............x....x|
+||||||||x....x.|||||...x||..x|
+||||||||x....x.|||||...x||..x|
+||||||||x.......x.x.x........|
+||||||||||||||||||||||||||||||`,
+  
 ]
 setMap(levels[level])
 
@@ -176,40 +191,22 @@ setPushables({
 })
 onInput("s", () => {
   getFirst(player).y += 1
-  getFirst(enemy).y += 1
 })
 onInput("d", () => {
   getFirst(player).x += 1
-  getFirst(enemy).x += 1
 })
 onInput("w", () => {
   getFirst(player).y -= 1
-  getFirst(enemy).y -= 1
 })
 onInput("a", () => {
   getFirst(player).x -= 1
-  getFirst(enemy).x -= 1
 })
-function handlePowerupCollection() {
-    const powerupCollected = true; 
-  
-    if (powerupCollected) {
-        const allDecoyWalls = getAll(decoywall);
-        allDecoyWalls.forEach(decoyWall => {
-            const tile = getTile(decoyWall.x, decoyWall.y);
-            tile.forEach(sprite => {
-                if (sprite.type === decoywall) {
-                    sprite.type = air; 
-                }
-            });
-        });
-    }
-}
+
 
 afterInput(() => {
-  const enemyOnGoal = getAll(enemy).some(enemy => {
-    const enemyTile = getTile(enemy.x, enemy.y);
-    return enemyTile.some(sprite => sprite.type === goal);
+  const enemyOnGoal = getAll(player).some(player => {
+    const playerTile = getTile(player.x, player.y);
+    return playerTile.some(sprite => sprite.type === goal);
   });
 
   if (level === 1 || level == 2) {
@@ -232,18 +229,12 @@ getAll(player).forEach(player => {
 
     if (collectedPowerup) {
       collectedPowerup.remove();
-      handlePowerupCollection();
+      player.remove()
+      addText("Game Over", { x: 10, y: 10, color: color`3` });
+      
     }
   });
 
-  getAll(enemy).forEach(enemy => {
-    const enemyTile = getTile(enemy.x, enemy.y);
-    const collectedPowerup = enemyTile.find(sprite => sprite.type === powerup);
 
-    if (collectedPowerup) {
-      collectedPowerup.remove();
-      handlePowerupCollection();
-    }
-  });
 
 });
